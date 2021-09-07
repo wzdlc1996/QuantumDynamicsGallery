@@ -16,37 +16,48 @@ x_min = -10
 dim = 1000
 X, dx = np.linspace(x_min, x_max, dim, retstep=True)
 dt = 0.1
-V = X ** 2 / 2
+# V = X ** 2 / 2
+V = np.array([0. if 0 < x < 2 else 1. for x in X])
 
 # Setup initial wavefunction
-x0 = 1
-p0 = 1
-wavef = np.exp(- (X - x0) ** 2 / (4 * 0.1) + 1.j * p0 * (X - x0))
+x0 = -5
+p0 = 2
+wavef = np.exp(- (X - x0) ** 2 / (4 * 0.1) - 1.j * p0 * (X - x0))
 wavef /= np.linalg.norm(wavef)
 
 # Crank-Nicolson Subroutine
 diag = -2 * np.ones(dim)
 diag[0] = diag[-1] = 1
-diag *= -0.5 / dx ** 2
+diag *= -0.5 * dt / dx ** 2
 diag += V
-upper = np.ones(dim) * (-0.5 / dx ** 2)
+upper = np.ones(dim) * (-0.5 * dt / dx ** 2)
 upper[0] = upper[1] = 0
-lower = np.ones(dim) * (-0.5 / dx ** 2)
+lower = np.ones(dim) * (-0.5 * dt / dx ** 2)
 lower[-1] = lower[-2] = 0
-hamil = - 0.5 * (1 / dx ** 2) * sp.dia_matrix(([diag, upper, lower], [0, 1, -1]), shape=(dim, dim), dtype=np.complex64)
+Hdt = - 0.5 * sp.dia_matrix(([diag, upper, lower], [0, 1, -1]), shape=(dim, dim), dtype=np.complex64)
 
 def next(psi):
-    b = (sp.eye(dim) - 1.j * dt * hamil / 2).dot(psi)
-    A = (sp.eye(dim) + 1.j * dt * hamil / 2)
+    b = (sp.eye(dim) - 1.j * Hdt / 2).dot(psi)
+    A = (sp.eye(dim) + 1.j * Hdt / 2)
     return sl.spsolve(A, b)
 
 # Visualization
 import matplotlib.pyplot as plt
+import matplotlib.animation as anm
+
 x = wavef
-for _ in range(1000):
+ylim = [min(np.abs(x) ** 2), max(np.abs(x) ** 2)]
+fig, ax = plt.subplots()
+ax.set_ylim(top=max(np.abs(x) ** 2))
+frames = []
+for k in range(1000):
     x = next(x)
-plt.plot(X, np.abs(x) ** 2)
-plt.show()
+    fm = ax.plot(X, np.abs(x) ** 2, animated=(k != 0), color="blue")
+    frames.append(fm)
+
+ani = anm.ArtistAnimation(fig, frames, interval=100, blit=True, repeat_delay=1000)
+ani.save("/home/leonard/temp.mp4")
+# plt.show()
 
 
 
