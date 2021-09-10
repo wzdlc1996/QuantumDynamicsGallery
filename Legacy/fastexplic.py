@@ -15,17 +15,17 @@ an explicit and stable method
 # Setup parameters
 x_max = 10
 x_min = -10
-dim = 1000
+dim = 100
 X, dx = np.linspace(x_min, x_max, dim, retstep=True)
-dt = 0.1
+dt = 0.01
 # V = X ** 2 / 2
-# V = np.array([0. if 0 < x < 2 else 1. for x in X])
-V = 0 * X
+V = np.array([0. if 0 < x < 2 else 1. for x in X]) * 10
+# V = 0 * X
 
 # Setup initial wavefunction
 x0 = -5
 p0 = 2
-wavef = np.exp(- (X - x0) ** 2 / (4 * 0.1) - 1.j * p0 * (X - x0))
+wavef = np.exp(- (X - x0) ** 2 / (4 * 0.1) + 1.j * p0 * (X - x0))
 wavef[0] = wavef[-1] = 0
 wavef /= np.linalg.norm(wavef)
 
@@ -68,23 +68,18 @@ temp = np.imag(x_v)
 psir = np.real(x)
 psii = np.imag(x_h)
 
-for _ in range(10):
-    temp = psii
-    psir, psii = next(psir, psii)
-
-print(psii[0])
-exit(0)
 
 ylim = [min(np.abs(x) ** 2), max(np.abs(x) ** 2)]
 fig, ax = plt.subplots()
 ax.set_ylim(top=max(np.abs(x) ** 2))
 frames = []
-for k in range(1000):
+for k in range(10000):
     temp = psii
     psir, psii = next(psir, psii)
-    prob = psir ** 2 + psii * temp
-    fm = ax.plot(X, prob, animated=(k != 0), color="blue")
-    frames.append(fm)
+    if k % 10 == 0:
+        prob = psir ** 2 + psii * temp
+        fm = ax.plot(X, prob, animated=(k != 0), color="blue")
+        frames.append(fm)
 
 ani = anm.ArtistAnimation(fig, frames, interval=100, blit=True, repeat_delay=1000)
 ani.save("/home/leonard/temp_fast.mp4")
