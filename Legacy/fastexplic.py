@@ -50,7 +50,6 @@ def next_crank(psi, delt_t=dt):
     return sl.spsolve(A, b)
 
 
-# Unstable, need review
 def next(psi_r, psi_i):
     psi_r = psi_r + Hdt.dot(psi_i)
     return psi_r, psi_i - Hdt.dot(psi_r)
