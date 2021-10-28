@@ -18,12 +18,12 @@ x_min = -10
 dim = 1000
 X, dx = np.linspace(x_min, x_max, dim, retstep=True)
 dt = 0.1
-V = X ** 2 / 2
-# V = np.array([0. if 0 < x < 2 else 1. for x in X])
+# V = X ** 2 / 2
+V = np.array([1. if 0 < x < 2 else 0. for x in X]) * 10
 
 # Setup initial wavefunction
 x0 = -5
-p0 = 2
+p0 = -2
 wavef = np.exp(- (X - x0) ** 2 / (4 * 0.1) - 1.j * p0 * (X - x0))
 wavef[0] = wavef[-1] = 0
 wavef /= np.linalg.norm(wavef)
